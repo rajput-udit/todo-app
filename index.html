@@ -1,0 +1,1403 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo Application</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --body-bg-light: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%); /* Light, airy blue gradient */
+            --body-bg-dark: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%); /* Deep, sophisticated dark blue/grey */
+            --container-bg-light: rgba(255, 255, 255, 0.9); /* Slightly more transparent */
+            --container-bg-dark: rgba(40, 44, 52, 0.95); /* Darker container */
+            --text-color-light: #333;
+            --text-color-dark: #f0f0f0; /* Light gray for dark mode text */
+            --muted-text-light: #666;
+            --muted-text-dark: #aaa;
+            --card-bg-light: #f8f9fa;
+            --card-bg-dark: #282c34; /* Even darker for cards/forms */
+            --input-border-light: #e9ecef;
+            --input-border-dark: #444951;
+            --input-focus-border-light: #66a6ff; /* Match new light gradient */
+            --input-focus-border-dark: #82aaff; /* Soft blue for dark focus */
+            --button-primary-bg-light: linear-gradient(45deg, #66a6ff, #89f7fe); /* Reversed light blue gradient for buttons */
+            --button-primary-bg-dark: linear-gradient(45deg, #2c5364, #203a43); /* Match dark gradient for buttons */
+            --button-text-color: white;
+            --todo-item-bg-light: #ffffff; /* Pure white for items */
+            --todo-item-bg-dark: #31363f; /* Darker items */
+            --todo-item-border-light: #e9ecef;
+            --todo-item-border-dark: #4a4f58;
+            --todo-item-completed-bg-light: #f8f9fa;
+            --todo-item-completed-bg-dark: #2a2e35;
+            --todo-item-completed-opacity: 0.7;
+            --todo-item-completed-text-light: #6c757d;
+            --todo-item-completed-text-dark: #888;
+            --shadow-light: 0 10px 30px rgba(0, 0, 0, 0.08); /* Softer shadow for light */
+            --shadow-dark: 0 15px 35px rgba(0, 0, 0, 0.25); /* Slightly softer but still prominent for dark */
+            --primary-accent: #66a6ff; /* Match new light gradient */
+            --primary-accent-dark: #82aaff; /* Match new dark focus */
+            --table-bg-light: var(--todo-item-bg-light);
+            --table-bg-dark: var(--card-bg-dark);
+            --table-striped-bg-light: rgba(0,0,0,.02);
+            --table-striped-bg-dark: rgba(255,255,255,.03);
+            --table-hover-bg-light: rgba(0,0,0,.04);
+            --table-hover-bg-dark: rgba(255,255,255,.05);
+            --table-border-light: #dee2e6;
+            --table-border-dark: #454d55;
+            --table-text-light: #212529;
+            --table-text-dark: var(--text-color-dark);
+            --table-header-bg-light: #f0f8ff; /* AliceBlue - very light blue for header */
+            --table-header-bg-dark: #2c3e50; /* Dark slate blue for dark header */
+            --link-color-light: var(--primary-accent);
+            --link-color-dark: var(--primary-accent-dark);
+            --link-hover-light: #5090e0; /* Slightly darker blue for hover */
+            --link-hover-dark: #9bbfff;
+            --switch-bg-light: #bdc3c7; /* Lighter grey for switch */
+            --switch-bg-dark: #7f8c8d; /* Darker grey for switch */
+            --switch-slider-light: white;
+            --switch-slider-dark: #ecf0f1; /* Light grey slider for dark mode */
+            --switch-checked-bg-light: var(--primary-accent);
+            --switch-checked-bg-dark: var(--primary-accent-dark);
+            --animation-duration: 0.3s;
+            --animation-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1); /* Smoother timing function */
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        body {
+            background: var(--body-bg-light);
+            min-height: 100vh;
+            font-family: 'Roboto', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Changed font */
+            color: var(--text-color-light);
+            transition: background var(--animation-duration) var(--animation-timing-function), color var(--animation-duration) var(--animation-timing-function);
+            font-size: 16px; /* Base font size */
+            line-height: 1.6; /* Improved line height */
+        }
+        body.dark-mode {
+            background: var(--body-bg-dark);
+            color: var(--text-color-dark);
+        }
+
+        .todo-container {
+            background: var(--container-bg-light);
+            backdrop-filter: blur(12px); /* Slightly more blur */
+            border-radius: 25px; /* Softer radius */
+            box-shadow: var(--shadow-light);
+            margin-top: 2.5rem; /* More spacing from top */
+            padding: 2.5rem; /* More internal padding */
+            transition: background var(--animation-duration) var(--animation-timing-function), box-shadow var(--animation-duration) var(--animation-timing-function);
+        }
+        body.dark-mode .todo-container {
+            background: var(--container-bg-dark);
+            box-shadow: var(--shadow-dark);
+        }
+
+        .todo-header {
+            margin-bottom: 2.5rem; /* More spacing */
+            color: var(--text-color-light);
+        }
+        body.dark-mode .todo-header {
+            color: var(--text-color-dark);
+        }
+        .todo-header .form-check-input {
+            background-color: var(--switch-bg-light);
+            border-color: var(--switch-bg-light); /* Ensure border matches */
+            width: 3.2em;
+            height: 1.6em;
+            border-radius: 1.6em;
+            transition: background-color var(--animation-duration) var(--animation-timing-function), border-color var(--animation-duration) var(--animation-timing-function);
+            -webkit-appearance: none; /* Remove default appearance */
+            appearance: none;
+            position: relative;
+            cursor: pointer;
+        }
+         .todo-header .form-check-input::before {
+            content: "";
+            position: absolute;
+            top: 0.2em;
+            left: 0.2em;
+            width: 1.2em;
+            height: 1.2em;
+            border-radius: 50%;
+            background-color: var(--switch-slider-light);
+            transition: transform var(--animation-duration) var(--animation-timing-function), background-color var(--animation-duration) var(--animation-timing-function);
+        }
+        .todo-header .form-check-input:checked {
+            background-color: var(--switch-checked-bg-light);
+            border-color: var(--switch-checked-bg-light); /* Ensure border matches */
+        }
+         .todo-header .form-check-input:checked::before {
+            transform: translateX(1.6em);
+            background-color: var(--switch-slider-light);
+        }
+
+        .todo-header .form-check-input:focus {
+            box-shadow: 0 0 0 0.2rem rgba(102, 166, 255, 0.35);
+        }
+        body.dark-mode .todo-header .form-check-input {
+            background-color: var(--switch-bg-dark);
+            border-color: var(--switch-bg-dark); /* Ensure border matches */
+        }
+        body.dark-mode .todo-header .form-check-input::before {
+            background-color: var(--switch-slider-dark);
+        }
+        body.dark-mode .todo-header .form-check-input:checked {
+            background-color: var(--switch-checked-bg-dark);
+            border-color: var(--switch-checked-bg-dark); /* Ensure border matches */
+        }
+        body.dark-mode .todo-header .form-check-input:checked::before {
+            background-color: var(--switch-slider-dark);
+        }
+        body.dark-mode .todo-header .form-check-input:focus {
+            box-shadow: 0 0 0 0.2rem rgba(130, 170, 255, 0.35);
+        }
+        .todo-header .form-check-label i {
+            font-size: 1.35rem;
+            color: var(--primary-accent);
+            transition: color var(--animation-duration) var(--animation-timing-function);
+            vertical-align: middle; /* Align icon with switch */
+        }
+        body.dark-mode .todo-header .form-check-label i {
+            color: var(--primary-accent-dark);
+        }
+        .todo-header .form-check.form-switch {
+            padding-left: 0; /* Remove default padding if custom styling switch */
+            display: flex; /* Align switch and icon nicely */
+            align-items: center;
+        }
+        .todo-header .form-check.form-switch .form-check-input {
+            margin-left: 0; /* Reset margin if needed */
+            margin-right: 0.5em; /* Space between switch and icon */
+        }
+
+
+        .todo-header h1 {
+            font-weight: 700;
+            font-size: 2.25rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .todo-header p {
+            color: var(--muted-text-light);
+            margin: 0;
+            font-size: 0.95rem;
+            transition: color var(--animation-duration) var(--animation-timing-function);
+        }
+        body.dark-mode .todo-header p {
+            color: var(--muted-text-dark);
+        }
+
+        .add-todo-form {
+            background: var(--card-bg-light);
+            border-radius: 18px;
+            padding: 1.75rem;
+            margin-bottom: 2.5rem;
+            border: 1px solid var(--input-border-light);
+            transition: background var(--animation-duration) var(--animation-timing-function), border-color var(--animation-duration) var(--animation-timing-function);
+        }
+        body.dark-mode .add-todo-form {
+            background: var(--card-bg-dark);
+            border: 1px solid var(--input-border-dark);
+        }
+
+        .add-todo-form:focus-within {
+            border-color: var(--input-focus-border-light);
+            box-shadow: 0 0 0 0.2rem rgba(102, 166, 255, 0.25);
+        }
+        body.dark-mode .add-todo-form:focus-within {
+            border-color: var(--input-focus-border-dark);
+            box-shadow: 0 0 0 0.2rem rgba(130, 170, 255, 0.25);
+        }
+
+        .todo-input {
+            border: none;
+            background: transparent;
+            font-size: 1.15rem;
+            padding: 0.6rem 0;
+            color: var(--text-color-light);
+            transition: color var(--animation-duration) var(--animation-timing-function);
+        }
+        body.dark-mode .todo-input {
+            color: var(--text-color-dark);
+        }
+        .todo-input::placeholder {
+            color: var(--muted-text-light);
+            transition: color var(--animation-duration) var(--animation-timing-function);
+        }
+        body.dark-mode .todo-input::placeholder {
+            color: var(--muted-text-dark);
+        }
+        input[type="datetime-local"] {
+            color-scheme: light; /* Default for light mode */
+        }
+        body.dark-mode input[type="datetime-local"] {
+            color-scheme: dark; /* Helps browser style the picker for dark mode */
+        }
+
+
+        .todo-input:focus {
+            box-shadow: none;
+            background: transparent;
+        }
+
+        .btn-add {
+            background: var(--button-primary-bg-light);
+            border: none;
+            border-radius: 12px;
+            padding: 0.85rem 1.75rem;
+            color: var(--button-text-color);
+            font-weight: 600;
+            letter-spacing: 0.5px; /* Added letter spacing */
+            transition: background var(--animation-duration) var(--animation-timing-function), transform 0.2s var(--animation-timing-function), box-shadow var(--animation-duration) var(--animation-timing-function);
+        }
+        body.dark-mode .btn-add {
+            background: var(--button-primary-bg-dark);
+            color: var(--text-color-dark);
+        }
+
+        .btn-add:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 6px 18px rgba(102, 166, 255, 0.45);
+        }
+        body.dark-mode .btn-add:hover {
+            box-shadow: 0 6px 18px rgba(44, 83, 100, 0.55);
+        }
+
+
+        .todo-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .todo-item {
+            background: var(--todo-item-bg-light);
+            border-radius: 18px;
+            margin-bottom: 1.2rem;
+            padding: 1.4rem;
+            border: 1px solid var(--todo-item-border-light);
+            transition: background var(--animation-duration) var(--animation-timing-function),
+                        border-color var(--animation-duration) var(--animation-timing-function),
+                        transform 0.2s var(--animation-timing-function),
+                        box-shadow var(--animation-duration) var(--animation-timing-function),
+                        opacity var(--animation-duration) var(--animation-timing-function);
+            position: relative;
+            overflow: hidden;
+            animation: fadeIn 0.5s var(--animation-timing-function);
+        }
+        body.dark-mode .todo-item {
+            background: var(--todo-item-bg-dark);
+            border: 1px solid var(--todo-item-border-dark);
+        }
+
+
+        .todo-item:hover {
+            transform: translateY(-3px) scale(1.01);
+            box-shadow: var(--shadow-light);
+        }
+        body.dark-mode .todo-item:hover {
+            box-shadow: var(--shadow-dark);
+        }
+
+
+        .todo-item.completed {
+            background: var(--todo-item-completed-bg-light);
+            opacity: var(--todo-item-completed-opacity);
+        }
+        body.dark-mode .todo-item.completed {
+            background: var(--todo-item-completed-bg-dark);
+        }
+
+        .todo-item.completed .todo-text {
+            text-decoration: line-through;
+            color: var(--todo-item-completed-text-light);
+            transition: color var(--animation-duration) var(--animation-timing-function);
+        }
+        body.dark-mode .todo-item.completed .todo-text {
+            color: var(--todo-item-completed-text-dark);
+        }
+
+
+        .todo-text {
+            font-size: 1.05rem; /* Adjusted if base font size changed */
+            margin: 0;
+            word-wrap: break-word;
+            transition: color var(--animation-duration) var(--animation-timing-function);
+        }
+
+        .reminder-text {
+            margin-top: 0.25rem;
+            font-size: 0.8em !important; /* Ensure it's small */
+        }
+        .reminder-text i {
+            margin-right: 0.25em;
+        }
+        body.dark-mode .reminder-text {
+            color: var(--muted-text-dark) !important;
+        }
+
+        .priority-indicator {
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+        .priority-high .priority-indicator { color: #dc3545; } /* Red for High */
+        .priority-medium .priority-indicator { color: #ffc107; } /* Yellow for Medium */
+        .priority-low .priority-indicator { color: #0dcaf0; } /* Cyan for Low */
+
+        body.dark-mode .priority-high .priority-indicator { color: #f07178; }
+        body.dark-mode .priority-medium .priority-indicator { color: #ffdDAA; }
+        body.dark-mode .priority-low .priority-indicator { color: #78dce8; }
+
+        /* Style for table rows based on priority (optional, subtle background tint) */
+        .priority-high-row { border-left: 3px solid #dc3545 !important; }
+        .priority-medium-row { border-left: 3px solid #ffc107 !important; }
+        .priority-low-row { border-left: 3px solid #0dcaf0 !important; }
+
+        body.dark-mode .priority-high-row { border-left-color: #f07178 !important; }
+        body.dark-mode .priority-medium-row { border-left-color: #ffdDAA !important; }
+        body.dark-mode .priority-low-row { border-left-color: #78dce8 !important; }
+
+        .form-select-sm {
+            padding-top: 0.4rem;
+            padding-bottom: 0.4rem;
+            font-size: 0.9em; /* Match other small form elements if any */
+        }
+
+        /* Custom styling for all select elements for consistency */
+        .form-select {
+            background-color: var(--todo-item-bg-light);
+            color: var(--text-color-light);
+            border: 1px solid var(--input-border-light);
+            border-radius: 12px; /* Match .btn-add */
+            transition: border-color var(--animation-duration) var(--animation-timing-function),
+                        background-color var(--animation-duration) var(--animation-timing-function),
+                        color var(--animation-duration) var(--animation-timing-function),
+                        box-shadow var(--animation-duration) var(--animation-timing-function);
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e"); /* Default Bootstrap arrow, themed later */
+        }
+
+        body.dark-mode .form-select {
+            background-color: var(--todo-item-bg-dark);
+            color: var(--text-color-dark);
+            border-color: var(--input-border-dark);
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ced4da' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e"); /* Dark mode arrow */
+        }
+
+        .form-select:focus {
+            border-color: var(--input-focus-border-light);
+            outline: 0;
+            box-shadow: 0 0 0 0.2rem rgba(102, 166, 255, 0.25); /* Match input focus */
+        }
+        body.dark-mode .form-select:focus {
+            border-color: var(--input-focus-border-dark);
+            box-shadow: 0 0 0 0.2rem rgba(130, 170, 255, 0.25); /* Match input focus for dark */
+        }
+
+        /* Remove .todo-input from #priorityInput to avoid conflicts */
+        /* The #priorityInput will now use .form-select and .form-select-sm */
+
+        /* Ensure .edit-input applied to select in edit mode also looks consistent */
+        select.edit-input { /* More specific selector if needed */
+            padding: 0.5rem; /* Override form-select-sm for edit inputs if they are larger */
+            font-size: 1.1rem; /* Match other edit inputs */
+             /* Other .edit-input styles (border, bg, color) are already variable-based */
+        }
+        body.dark-mode select.edit-input {
+            /* Dark mode specific overrides for edit-input selects if needed */
+        }
+
+
+        .todo-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .btn-action {
+            border: none;
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: background-color var(--animation-duration) var(--animation-timing-function),
+                        color var(--animation-duration) var(--animation-timing-function),
+                        transform 0.2s var(--animation-timing-function),
+                        box-shadow var(--animation-duration) var(--animation-timing-function);
+            cursor: pointer;
+        }
+        .btn-action:hover {
+            transform: scale(1.05); /* Keep consistent hover scale */
+        }
+        /* Specific button colors will be handled by Bootstrap or overridden if needed for dark mode */
+        body.dark-mode .btn-edit {
+            background: #b38600; /* Darker yellow */
+            color: #f0f0f0;
+        }
+        body.dark-mode .btn-edit:hover {
+            background: #997400;
+        }
+
+
+        .btn-complete {
+            background: #28a745;
+            color: white;
+        }
+        body.dark-mode .btn-complete { /* Assuming this is for "Complete" action */
+            background: #1e7e34; /* Darker green */
+        }
+        body.dark-mode .btn-complete:hover {
+             background: #155b25;
+        }
+        /* Style for "Undo" button (typically .btn-info or similar if it has different text) */
+        body.dark-mode .btn-info { /* Bootstrap's default info, or a custom class for "Undo" */
+            background-color: #138496; /* Default BS info */
+        }
+        body.dark-mode .btn-info:hover {
+            background-color: #117a8b;
+        }
+
+
+        .btn-complete:hover {
+            background: #218838;
+            transform: scale(1.05);
+        }
+
+        .btn-edit {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .btn-edit:hover {
+            background: #e0a800;
+            transform: scale(1.05);
+        }
+
+        .btn-delete {
+            background: #dc3545;
+            color: white;
+        }
+        body.dark-mode .btn-delete {
+            background: #b02a37; /* Darker red */
+        }
+        body.dark-mode .btn-delete:hover {
+            background: #90212c;
+        }
+
+        .btn-delete:hover {
+            background: #c82333;
+            transform: scale(1.05);
+        }
+
+        .btn-save {
+            background: #17a2b8; /* Typically info color */
+            color: white;
+        }
+        body.dark-mode .btn-save {
+            background: #117a8b; /* Darker info */
+        }
+        body.dark-mode .btn-save:hover {
+            background: #0f6674;
+        }
+
+
+        .btn-save:hover {
+            background: #138496;
+            transform: scale(1.05);
+        }
+
+        .btn-cancel {
+            background: #6c757d; /* Secondary color */
+            color: white;
+        }
+        body.dark-mode .btn-cancel {
+            background: #545b62; /* Darker secondary */
+        }
+        body.dark-mode .btn-cancel:hover {
+            background: #43484d;
+        }
+
+        .btn-cancel:hover {
+            background: #5a6268;
+            transform: scale(1.05);
+        }
+
+        .edit-input {
+            border: 2px solid var(--input-focus-border-light); /* Use focus color for consistency */
+            border-radius: 8px;
+            padding: 0.5rem;
+            font-size: 1.1rem;
+            width: 100%;
+            margin-bottom: 1rem;
+            background-color: var(--todo-item-bg-light); /* Match item bg */
+            color: var(--text-color-light);
+        }
+        body.dark-mode .edit-input {
+            border: 2px solid var(--input-focus-border-dark);
+            background-color: var(--todo-item-bg-dark);
+            color: var(--text-color-dark);
+        }
+
+
+        .edit-input:focus {
+            outline: none;
+            box-shadow: 0 0 0 0.2rem rgba(23, 162, 184, 0.25); /* Using the save button color for focus */
+        }
+        body.dark-mode .edit-input:focus {
+            box-shadow: 0 0 0 0.2rem rgba(17, 122, 139, 0.35);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--muted-text-light);
+        }
+        body.dark-mode .empty-state {
+            color: var(--muted-text-dark);
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            background: var(--card-bg-light);
+            border-radius: 15px;
+            padding: 1rem;
+            margin-bottom: 2rem;
+            transition: background var(--animation-duration) var(--animation-timing-function);
+        }
+        body.dark-mode .stats {
+            background: var(--card-bg-dark);
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-accent);
+            transition: color var(--animation-duration) var(--animation-timing-function);
+        }
+        body.dark-mode .stat-number {
+            color: var(--primary-accent-dark);
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--muted-text-light);
+            margin-top: 0.25rem;
+            transition: color var(--animation-duration) var(--animation-timing-function);
+        }
+        body.dark-mode .stat-label {
+            color: var(--muted-text-dark);
+        }
+
+
+        @media (max-width: 768px) {
+            .todo-container {
+                margin: 1rem;
+                padding: 1.5rem;
+            }
+
+            .stats {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+
+        /* Styles for Table View */
+        #tableViewContainer {
+            margin-top: 2rem;
+        }
+
+        .table th, .table td {
+            vertical-align: middle;
+            border-color: var(--table-border-light);
+            color: var(--table-text-light);
+        }
+        body.dark-mode .table th, body.dark-mode .table td {
+            border-color: var(--table-border-dark);
+            color: var(--table-text-dark);
+        }
+        .table thead th {
+            background-color: var(--table-header-bg-light);
+        }
+        body.dark-mode .table thead th {
+            background-color: var(--table-header-bg-dark);
+        }
+
+
+        .table-striped > tbody > tr:nth-of-type(odd) > * {
+            background-color: var(--table-striped-bg-light); /* BS uses rgba, so this is an approximation */
+        }
+        body.dark-mode .table-striped > tbody > tr:nth-of-type(odd) > * {
+            background-color: var(--table-striped-bg-dark);
+        }
+
+        .table-hover > tbody > tr:hover > * {
+            background-color: var(--table-hover-bg-light);
+        }
+        body.dark-mode .table-hover > tbody > tr:hover > * {
+            background-color: var(--table-hover-bg-dark);
+        }
+
+        /* Table success (completed row) styling */
+        .table-light { /* Bootstrap class for light backgrounds in tables */
+             --bs-table-bg: var(--todo-item-completed-bg-light);
+             --bs-table-striped-bg: var(--todo-item-completed-bg-light); /* Ensure striped doesn't override */
+        }
+        body.dark-mode .table-light { /* Re-purpose for our completed style in dark mode */
+            --bs-table-bg: var(--todo-item-completed-bg-dark);
+            --bs-table-striped-bg: var(--todo-item-completed-bg-dark);
+            color: var(--todo-item-completed-text-dark) !important; /* Ensure text color is also muted */
+        }
+        body.dark-mode .table-light td, body.dark-mode .table-light th {
+            color: var(--todo-item-completed-text-dark) !important;
+        }
+        body.dark-mode .table-light .badge { /* Make badge less prominent on completed dark rows */
+            opacity: 0.7;
+        }
+
+
+        .badge {
+            font-size: 0.9em;
+        }
+        /* Badge colors are generally fine with Bootstrap defaults, but can be tweaked if needed */
+        body.dark-mode .bg-success {
+            background-color: #1e7e34 !important; /* Ensure it's visible on dark bg */
+        }
+        body.dark-mode .bg-warning {
+            background-color: #b38600 !important;
+            color: #1a1a1a !important; /* Dark text for yellow badge */
+        }
+
+
+        .edit-input.form-control { /* Ensure table edit input is styled consistently */
+            margin-bottom: 0.5rem !important; /* Override general edit-input margin if needed */
+            /* Dark mode for this already handled by general .edit-input rules */
+        }
+
+        .pagination .page-link {
+            color: var(--link-color-light);
+            border-radius: 0.25rem; /* Softer edges for pagination items */
+            margin: 0 2px; /* Spacing between pagination buttons */
+            background-color: var(--todo-item-bg-light); /* Match item bg */
+            border: 1px solid var(--input-border-light);
+        }
+        body.dark-mode .pagination .page-link {
+            color: var(--link-color-dark);
+            background-color: var(--todo-item-bg-dark);
+            border: 1px solid var(--input-border-dark);
+        }
+
+        .pagination .page-link:hover {
+            color: var(--link-hover-light);
+            background-color: #e9ecef; /* Standard hover color */
+        }
+        body.dark-mode .pagination .page-link:hover {
+            color: var(--link-hover-dark);
+            background-color: #3a3f47; /* Darker hover */
+        }
+
+        .pagination .page-item.active .page-link {
+            background-color: var(--primary-accent);
+            border-color: var(--primary-accent);
+            color: white;
+        }
+        body.dark-mode .pagination .page-item.active .page-link {
+            background-color: var(--primary-accent-dark);
+            border-color: var(--primary-accent-dark);
+        }
+
+        .pagination .page-item.disabled .page-link {
+            color: var(--muted-text-light);
+            background-color: var(--todo-item-bg-light);
+            border-color: var(--input-border-light);
+        }
+        body.dark-mode .pagination .page-item.disabled .page-link {
+            color: var(--muted-text-dark);
+            background-color: var(--todo-item-bg-dark);
+            border-color: var(--input-border-dark);
+        }
+
+
+        #toggleViewBtn {
+            background-color: #6c757d; /* Bootstrap secondary */
+            border-color: #6c757d;
+            color: white;
+            transition: background-color var(--animation-duration) var(--animation-timing-function), border-color var(--animation-duration) var(--animation-timing-function), transform 0.2s var(--animation-timing-function);
+        }
+        body.dark-mode #toggleViewBtn {
+            background-color: #545b62; /* Darker secondary */
+            border-color: #545b62;
+        }
+
+        #toggleViewBtn:hover {
+            background-color: #5a6268;
+            border-color: #545b62;
+            transform: translateY(-2px);
+        }
+        body.dark-mode #toggleViewBtn:hover {
+            background-color: #43484d;
+            border-color: #3b4045;
+            transform: translateY(-2px);
+        }
+
+        /* General hover effect for all buttons for consistency if not already scaled by btn-action */
+        .btn:hover:not(.btn-action) { /* Avoid double scaling on btn-action */
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        body.dark-mode .btn:hover:not(.btn-action) {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 col-md-10">
+                <div class="todo-container">
+                    <div class="todo-header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h1><i class="fas fa-list"></i> My Todo List</h1>
+                                <p>Stay organized and get things done!</p>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" role="switch" id="themeToggle">
+                                <label class="form-check-label" for="themeToggle"><i class="fas fa-moon"></i></label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stats">
+                        <div class="stat">
+                            <div class="stat-number" id="totalTasks">0</div>
+                            <div class="stat-label">Total Tasks</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-number" id="completedTasks">0</div>
+                            <div class="stat-label">Completed</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-number" id="pendingTasks">0</div>
+                            <div class="stat-label">Pending</div>
+                        </div>
+                    </div>
+
+                    <div class="add-todo-form">
+                        <div class="row g-2 mb-3">
+                            <div class="col-md-8">
+                                <input type="text" class="form-control todo-input" id="todoInput"
+                                    placeholder="What needs to be done?" maxlength="200">
+                            </div>
+                            <div class="col-md-4">
+                                <input type="datetime-local" class="form-control todo-input" id="reminderTimeInput">
+                            </div>
+                        </div>
+                        <div class="row g-2 mb-3 align-items-end">
+                            <div class="col-md-3">
+                                <label for="priorityInput" class="form-label small mb-0">Priority:</label>
+                                <select class="form-select form-select-sm" id="priorityInput"> {/* Removed todo-input class */}
+                                    <option value="low">Low</option>
+                                    <option value="medium" selected>Medium</option>
+                                    <option value="high">High</option>
+                                </select>
+                            </div>
+                            <div class="col-md-5"></div>
+                            <div class="col-md-4 text-end">
+                                <button class="btn btn-add w-100" id="addBtn">
+                                    <i class="fas fa-plus"></i> Add Task
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end mb-3">
+                        <div class="col-md-3">
+                             <label for="sortOrder" class="form-label small mb-0">Sort by:</label>
+                            <select class="form-select form-select-sm" id="sortOrder">
+                                <option value="default" selected>Default</option>
+                                <option value="priority">Priority</option>
+                                <option value="dueDate">Due Date</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <ul class="todo-list" id="todoList">
+                        <div class="empty-state" id="emptyState">
+                            <i class="fas fa-clipboard-list"></i>
+                            <h4>No todos yet!</h4>
+                            <p>Add your first task above to get started.</p>
+                        </div>
+                    </ul>
+
+                    <div id="tableViewContainer" style="display: none;">
+                        <table class="table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Task</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="todoTableBody">
+                            </tbody>
+                        </table>
+                        <nav aria-label="Page navigation">
+                            <ul class="pagination justify-content-center" id="paginationControls">
+                            </ul>
+                        </nav>
+                    </div>
+
+                    <div class="text-center mt-3">
+                        <button class="btn btn-secondary" id="toggleViewBtn" style="display: none;">Switch to Table View</button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        class TodoApp {
+            constructor() {
+                this.todos = [];
+                this.nextId = 1;
+                this.editingId = null;
+                this.currentView = 'list'; // 'list' or 'table'
+                this.currentPage = 1;
+                this.itemsPerPage = 5;
+                this.currentSortOrder = 'default'; // Added
+
+
+                this.reminderTimeInput = document.getElementById('reminderTimeInput');
+                this.priorityInput = document.getElementById('priorityInput'); // Added
+                this.sortOrderSelect = document.getElementById('sortOrder'); // Added
+                this.todoInput = document.getElementById('todoInput');
+                this.addBtn = document.getElementById('addBtn');
+                this.todoList = document.getElementById('todoList');
+                this.emptyState = document.getElementById('emptyState');
+                this.totalTasks = document.getElementById('totalTasks');
+                this.completedTasks = document.getElementById('completedTasks');
+                this.pendingTasks = document.getElementById('pendingTasks');
+                this.tableViewContainer = document.getElementById('tableViewContainer');
+                this.todoTableBody = document.getElementById('todoTableBody');
+                this.paginationControls = document.getElementById('paginationControls');
+                this.toggleViewBtn = document.getElementById('toggleViewBtn');
+                this.themeToggle = document.getElementById('themeToggle');
+
+
+                this.init();
+            }
+
+            init() {
+                this.addBtn.addEventListener('click', () => this.addTodo());
+                this.todoInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') this.addTodo();
+                });
+                this.toggleViewBtn.addEventListener('click', () => this.toggleView());
+                this.themeToggle.addEventListener('change', () => this.toggleTheme());
+                this.sortOrderSelect.addEventListener('change', (e) => this.setSortOrder(e.target.value)); // Added
+
+                // Check for saved theme preference
+                if (localStorage.getItem('theme') === 'dark') {
+                    document.body.classList.add('dark-mode');
+                    this.themeToggle.checked = true;
+                    this.updateThemeIcon(true);
+                } else {
+                    this.updateThemeIcon(false);
+                }
+
+                this.requestNotificationPermission();
+                setInterval(() => this.checkReminders(), 60000); // Check every minute
+
+
+                this.updateDisplay();
+            }
+
+            setSortOrder(sortOrder) {
+                this.currentSortOrder = sortOrder;
+                this.updateDisplay();
+            }
+
+            sortTodos() {
+                const priorityOrder = { high: 1, medium: 2, low: 3 };
+                this.todos.sort((a, b) => {
+                    if (this.currentSortOrder === 'priority') {
+                        const priorityDiff = priorityOrder[a.priority] - priorityOrder[b.priority];
+                        if (priorityDiff !== 0) return priorityDiff;
+                        return a.id - b.id; // Secondary sort by ID (creation order)
+                    } else if (this.currentSortOrder === 'dueDate') {
+                        const dateA = a.reminderTime ? new Date(a.reminderTime) : null;
+                        const dateB = b.reminderTime ? new Date(b.reminderTime) : null;
+                        if (dateA && dateB) return dateA - dateB;
+                        if (dateA) return -1; // Tasks with due dates come before those without
+                        if (dateB) return 1;
+                        return a.id - b.id; // Secondary sort for items without due dates
+                    } else { // default
+                        return a.id - b.id;
+                    }
+                });
+            }
+
+
+            requestNotificationPermission() {
+                if (!('Notification' in window)) {
+                    console.log('This browser does not support desktop notification');
+                    return;
+                }
+                if (Notification.permission !== 'denied' && Notification.permission !== 'granted') {
+                    Notification.requestPermission().then(permission => {
+                        if (permission === 'granted') {
+                            console.log('Notification permission granted.');
+                        } else {
+                            console.log('Notification permission denied.');
+                        }
+                    });
+                }
+            }
+
+            checkReminders() {
+                const now = new Date();
+                let needsUpdate = false;
+                this.todos.forEach(todo => {
+                    if (todo.reminderTime && !todo.completed && !todo.reminderTriggered) {
+                        const reminderDateTime = new Date(todo.reminderTime);
+                        if (reminderDateTime <= now) {
+                            this.showNotification(todo);
+                            todo.reminderTriggered = true;
+                            // Auto-complete task
+                            if (!todo.completed) {
+                                this.toggleComplete(todo.id, true); // Pass a flag for auto-completion
+                                needsUpdate = true;
+                            }
+                        }
+                    }
+                });
+                if (needsUpdate) {
+                    this.updateDisplay(); // Update display if any task was auto-completed
+                }
+            }
+
+            showNotification(todo) {
+                if (Notification.permission === 'granted') {
+                    const notification = new Notification('Todo Reminder!', {
+                        body: `Don't forget: ${todo.text}`,
+                        icon: './favicon.ico' // Optional: Add an icon
+                    });
+                    // Can add onclick event for notification if needed
+                } else if (Notification.permission !== 'denied') {
+                    // Re-request permission if it's default, as user might have missed the initial prompt
+                    // However, browsers might block repeated requests if not user-initiated.
+                    // For simplicity, we rely on the initial request.
+                    console.log('Notification permission not granted. Cannot show notification.');
+                }
+            }
+
+
+            toggleTheme() {
+                document.body.classList.toggle('dark-mode');
+                const isDarkMode = document.body.classList.contains('dark-mode');
+                localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+                this.updateThemeIcon(isDarkMode);
+            }
+
+            updateThemeIcon(isDarkMode) {
+                const icon = this.themeToggle.nextElementSibling.querySelector('i');
+                if (isDarkMode) {
+                    icon.classList.remove('fa-moon');
+                    icon.classList.add('fa-sun');
+                } else {
+                    icon.classList.remove('fa-sun');
+                    icon.classList.add('fa-moon');
+                }
+            }
+
+            toggleView() {
+                this.currentView = this.currentView === 'list' ? 'table' : 'list';
+                this.currentPage = 1; // Reset to first page on view switch
+                this.updateDisplay();
+            }
+
+            addTodo() {
+                const text = this.todoInput.value.trim();
+                const reminderTimeValue = this.reminderTimeInput.value;
+                const priorityValue = this.priorityInput.value;
+
+                if (!text) return;
+
+                const todo = {
+                    id: this.nextId++,
+                    text: text,
+                    completed: false,
+                    createdAt: new Date(),
+                    reminderTime: reminderTimeValue ? new Date(reminderTimeValue).toISOString() : null,
+                    reminderTriggered: false,
+                    priority: priorityValue || 'medium',
+                    isAutoCompleted: false
+                };
+
+                this.todos.push(todo);
+                this.todoInput.value = '';
+                this.reminderTimeInput.value = '';
+                this.priorityInput.value = 'medium'; // Reset priority dropdown
+                this.updateDisplay();
+            }
+
+            toggleComplete(id, isAutoCompletion = false) {
+                const todo = this.todos.find(t => t.id === id);
+                if (todo) {
+                    todo.completed = !todo.completed;
+                    if (todo.completed && isAutoCompletion) {
+                        todo.isAutoCompleted = true;
+                    } else if (!todo.completed) {
+                        todo.isAutoCompleted = false; // Reset if manually un-completed
+                    }
+                    this.updateDisplay();
+                }
+            }
+
+            deleteTodo(id) {
+                this.todos = this.todos.filter(t => t.id !== id);
+                this.updateDisplay();
+            }
+
+            startEdit(id) {
+                this.editingId = id;
+                this.updateDisplay();
+            }
+
+            saveEdit(id, newText, newReminderTime, newPriority) {
+                const todo = this.todos.find(t => t.id === id);
+                if (todo) {
+                    if (newText.trim()) {
+                        todo.text = newText.trim();
+                    }
+                    const oldReminderTime = todo.reminderTime;
+                    todo.reminderTime = newReminderTime ? new Date(newReminderTime).toISOString() : null;
+                    if (todo.reminderTime !== oldReminderTime) {
+                        todo.reminderTriggered = false;
+                        todo.isAutoCompleted = false; // Reset auto-completion if reminder changes
+                    }
+                    todo.priority = newPriority || 'medium';
+                }
+                this.editingId = null;
+                this.updateDisplay();
+            }
+
+            cancelEdit() {
+                this.editingId = null;
+                this.updateDisplay();
+            }
+
+            updateStats() {
+                const total = this.todos.length;
+                const completed = this.todos.filter(t => t.completed).length;
+                const pending = total - completed;
+
+                this.totalTasks.textContent = total;
+                this.completedTasks.textContent = completed;
+                this.pendingTasks.textContent = pending;
+            }
+
+            renderTodo(todo) {
+                const isEditing = this.editingId === todo.id;
+
+                if (isEditing) {
+                    const reminderValue = todo.reminderTime ? new Date(new Date(todo.reminderTime).getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16) : '';
+                    return `
+                        <li class="todo-item">
+                            <input type="text" 
+                                   class="form-control edit-input mb-2"
+                                   value="${todo.text}" 
+                                   id="editInput${todo.id}"
+                                   maxlength="200">
+                            <input type="datetime-local"
+                                   class="form-control edit-input mb-2"
+                                   id="editReminderInput${todo.id}"
+                                   value="${reminderValue}">
+                            <select class="form-select form-select-sm edit-input mb-2" id="editPriorityInput${todo.id}">
+                                <option value="low" ${todo.priority === 'low' ? 'selected' : ''}>Low</option>
+                                <option value="medium" ${todo.priority === 'medium' ? 'selected' : ''}>Medium</option>
+                                <option value="high" ${todo.priority === 'high' ? 'selected' : ''}>High</option>
+                            </select>
+                            <div class="todo-actions">
+                                <button class="btn-action btn-save" onclick="todoApp.saveEdit(${todo.id}, document.getElementById('editInput${todo.id}').value, document.getElementById('editReminderInput${todo.id}').value, document.getElementById('editPriorityInput${todo.id}').value)">
+                                    <i class="fas fa-save"></i> Save
+                                </button>
+                                <button class="btn-action btn-cancel" onclick="todoApp.cancelEdit()">
+                                    <i class="fas fa-times"></i> Cancel
+                                </button>
+                            </div>
+                        </li>
+                    `;
+                }
+
+                const priorityClass = `priority-${todo.priority}`;
+                const priorityIcon = todo.priority === 'high' ? 'fa-exclamation-circle' : todo.priority === 'medium' ? 'fa-circle' : 'fa-info-circle';
+                return `
+                    <li class="todo-item ${todo.completed ? 'completed' : ''} ${priorityClass}">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <p class="todo-text mb-0">${todo.text}</p>
+                                ${todo.reminderTime ? `<p class="reminder-text small text-muted mb-1"><i class="fas fa-bell"></i> ${new Date(todo.reminderTime).toLocaleString()}</p>` : ''}
+                            </div>
+                            <span class="priority-indicator ms-2"><i class="fas ${priorityIcon}" title="Priority: ${todo.priority.charAt(0).toUpperCase() + todo.priority.slice(1)}"></i></span>
+                        </div>
+                        <div class="todo-actions mt-2">
+                            <button class="btn-action btn-complete" onclick="todoApp.toggleComplete(${todo.id})">
+                                <i class="fas fa-${todo.completed ? 'undo' : 'check'}"></i> 
+                                ${todo.completed ? 'Undo' : 'Complete'}
+                            </button>
+                            <button class="btn-action btn-edit" onclick="todoApp.startEdit(${todo.id})">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                            <button class="btn-action btn-delete" onclick="todoApp.deleteTodo(${todo.id})">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </div>
+                    </li>
+                `;
+            }
+
+            updateDisplay() {
+                this.updateStats();
+                this.sortTodos(); // Sort todos before rendering
+
+                // Auto-switch logic
+                if (this.todos.length > 5 && this.currentView === 'list') {
+                    this.currentView = 'table';
+                    this.currentPage = 1;
+                } else if (this.todos.length <= 5 && this.currentView === 'table') {
+                    // Optional: switch back to list if desired, or let user control
+                    // For now, let's keep it in table view unless manually switched or becomes empty
+                }
+
+
+                if (this.todos.length === 0) {
+                    this.emptyState.style.display = 'block';
+                    this.todoList.innerHTML = this.emptyState.outerHTML; // Show empty state in list area
+                    this.todoList.style.display = 'block'; // Ensure list area is visible for empty state
+                    this.tableViewContainer.style.display = 'none';
+                    this.toggleViewBtn.style.display = 'none';
+                } else {
+                    this.emptyState.style.display = 'none';
+                    this.toggleViewBtn.style.display = 'block';
+
+                    if (this.currentView === 'list') {
+                        this.todoList.style.display = 'block';
+                        this.tableViewContainer.style.display = 'none';
+                        this.todoList.innerHTML = this.todos.map(todo => this.renderTodo(todo)).join('');
+                        this.toggleViewBtn.textContent = 'Switch to Table View';
+                    } else { // Table view
+                        this.todoList.style.display = 'none';
+                        this.tableViewContainer.style.display = 'block';
+
+                        const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+                        const endIndex = startIndex + this.itemsPerPage;
+                        const paginatedTodos = this.todos.slice(startIndex, endIndex);
+
+                        this.todoTableBody.innerHTML = paginatedTodos.map(todo => this.renderTableTodo(todo)).join('');
+                        this.renderPaginationControls(this.todos.length);
+                        this.toggleViewBtn.textContent = 'Switch to List View';
+                    }
+                }
+
+                // Focus on edit input if editing, handles both list and table edit inputs
+                if (this.editingId) {
+                    const listEditInput = document.getElementById(`editInput${this.editingId}`);
+                    const tableEditInput = document.getElementById(`editInputTable${this.editingId}`);
+                    let activeEditInput = null;
+
+                    if (this.currentView === 'list' && listEditInput) {
+                        activeEditInput = listEditInput;
+                    } else if (this.currentView === 'table' && tableEditInput) {
+                        activeEditInput = tableEditInput;
+                    }
+
+                    if (activeEditInput) {
+                        activeEditInput.focus();
+                        activeEditInput.select();
+                        // Remove previous listener to avoid multiple triggers if any
+                        activeEditInput.onkeypress = null;
+                        activeEditInput.onkeypress = (e) => {
+                            if (e.key === 'Enter') {
+                                // For saving with Enter, we need to get both text and reminder values
+                                const textValue = activeEditInput.value;
+                                let reminderValue = null;
+                                let priorityValue = null;
+                                if (this.currentView === 'list') {
+                                    const reminderInput = document.getElementById(`editReminderInput${this.editingId}`);
+                                    if (reminderInput) reminderValue = reminderInput.value;
+                                    const prioritySelect = document.getElementById(`editPriorityInput${this.editingId}`);
+                                    if (prioritySelect) priorityValue = prioritySelect.value;
+                                } else { // table view
+                                    const reminderInput = document.getElementById(`editReminderInputTable${this.editingId}`);
+                                    if (reminderInput) reminderValue = reminderInput.value;
+                                    const prioritySelect = document.getElementById(`editPriorityInputTable${this.editingId}`);
+                                    if (prioritySelect) priorityValue = prioritySelect.value;
+                                }
+                                this.saveEdit(this.editingId, textValue, reminderValue, priorityValue);
+                            } else if (e.key === 'Escape') {
+                                this.cancelEdit();
+                            }
+                        };
+                    }
+                }
+            }
+
+            renderTableTodo(todo) {
+                const isEditing = this.editingId === todo.id;
+
+                if (isEditing) {
+                    const reminderValue = todo.reminderTime ? new Date(new Date(todo.reminderTime).getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16) : '';
+                    // For table view, editing will replace the row content with an input field.
+                    // We'll need a specific ID for the table edit input.
+                    return `
+                        <tr>
+                            <td colspan="3">
+                                <input type="text"
+                                       class="form-control edit-input mb-2"
+                                       value="${todo.text}"
+                                       id="editInputTable${todo.id}"
+                                       maxlength="200">
+                                <input type="datetime-local"
+                                       class="form-control edit-input mb-2"
+                                       id="editReminderInputTable${todo.id}"
+                                       value="${reminderValue}">
+                                <select class="form-select form-select-sm edit-input mb-2" id="editPriorityInputTable${todo.id}">
+                                    <option value="low" ${todo.priority === 'low' ? 'selected' : ''}>Low</option>
+                                    <option value="medium" ${todo.priority === 'medium' ? 'selected' : ''}>Medium</option>
+                                    <option value="high" ${todo.priority === 'high' ? 'selected' : ''}>High</option>
+                                </select>
+                                <div class="todo-actions mt-2">
+                                    <button class="btn-action btn-sm btn-save" onclick="todoApp.saveEdit(${todo.id}, document.getElementById('editInputTable${todo.id}').value, document.getElementById('editReminderInputTable${todo.id}').value, document.getElementById('editPriorityInputTable${todo.id}').value)">
+                                        <i class="fas fa-save"></i> Save
+                                    </button>
+                                    <button class="btn-action btn-sm btn-cancel" onclick="todoApp.cancelEdit()">
+                                        <i class="fas fa-times"></i> Cancel
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                }
+
+                const priorityClass = `priority-${todo.priority}`;
+                const priorityIcon = todo.priority === 'high' ? 'fa-exclamation-circle' : todo.priority === 'medium' ? 'fa-circle' : 'fa-info-circle';
+                return `
+                    <tr class="${todo.completed ? 'table-light' : ''} ${priorityClass}-row">
+                        <td class="${todo.completed ? 'text-decoration-line-through text-muted' : ''}">
+                            <span class="priority-indicator me-2"><i class="fas ${priorityIcon}" title="Priority: ${todo.priority.charAt(0).toUpperCase() + todo.priority.slice(1)}"></i></span>
+                            ${todo.text}
+                            ${todo.reminderTime ? `<br><small class="reminder-text text-muted ms-3"><i class="fas fa-bell"></i> ${new Date(todo.reminderTime).toLocaleString()}</small>` : ''}
+                        </td>
+                        <td>
+                            <span class="badge ${todo.completed ? 'bg-success' : 'bg-warning'}">
+                                ${todo.completed ? 'Completed' : 'Pending'}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <button class="btn btn-sm btn-${todo.completed ? 'info' : 'success'} btn-action" onclick="todoApp.toggleComplete(${todo.id})">
+                                    <i class="fas fa-${todo.completed ? 'undo' : 'check'}"></i>
+                                    ${todo.completed ? 'Undo' : 'Complete'}
+                                </button>
+                                <button class="btn btn-sm btn-warning btn-action" onclick="todoApp.startEdit(${todo.id})">
+                                    <i class="fas fa-edit"></i> Edit
+                                </button>
+                                <button class="btn btn-sm btn-danger btn-action" onclick="todoApp.deleteTodo(${todo.id})">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }
+
+            renderPaginationControls(totalItems) {
+                this.paginationControls.innerHTML = '';
+                const totalPages = Math.ceil(totalItems / this.itemsPerPage);
+
+                if (totalPages <= 1) return;
+
+                // Previous Button
+                const prevLi = document.createElement('li');
+                prevLi.classList.add('page-item');
+                if (this.currentPage === 1) prevLi.classList.add('disabled');
+                const prevLink = document.createElement('a');
+                prevLink.classList.add('page-link');
+                prevLink.href = '#';
+                prevLink.textContent = 'Previous';
+                prevLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (this.currentPage > 1) {
+                        this.currentPage--;
+                        this.updateDisplay();
+                    }
+                });
+                prevLi.appendChild(prevLink);
+                this.paginationControls.appendChild(prevLi);
+
+                // Page Number Buttons
+                for (let i = 1; i <= totalPages; i++) {
+                    const pageLi = document.createElement('li');
+                    pageLi.classList.add('page-item');
+                    if (i === this.currentPage) pageLi.classList.add('active');
+
+                    const pageLink = document.createElement('a');
+                    pageLink.classList.add('page-link');
+                    pageLink.href = '#';
+                    pageLink.textContent = i;
+                    pageLink.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        this.currentPage = i;
+                        this.updateDisplay();
+                    });
+                    pageLi.appendChild(pageLink);
+                    this.paginationControls.appendChild(pageLi);
+                }
+
+                // Next Button
+                const nextLi = document.createElement('li');
+                nextLi.classList.add('page-item');
+                if (this.currentPage === totalPages) nextLi.classList.add('disabled');
+                const nextLink = document.createElement('a');
+                nextLink.classList.add('page-link');
+                nextLink.href = '#';
+                nextLink.textContent = 'Next';
+                nextLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (this.currentPage < totalPages) {
+                        this.currentPage++;
+                        this.updateDisplay();
+                    }
+                });
+                nextLi.appendChild(nextLink);
+                this.paginationControls.appendChild(nextLi);
+            }
+        }
+
+        // Initialize the app
+        const todoApp = new TodoApp();
+    </script>
+</body>
+
+</html>
